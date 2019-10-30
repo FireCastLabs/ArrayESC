@@ -1,0 +1,39 @@
+# Test build the arduino library with Travis CI and PlatformIO
+language: python
+# Force Python 2.7 until platformio is compatable with Python 3
+python:
+  - "2.7"
+
+# Cache PlatformIO packages using Travis CI container-based infrastructure
+sudo: false
+cache:
+  directories:
+    - "~/.platformio"
+
+matrix:
+  fast_finish: true
+  include:
+    - env: BOARD=megaatmega2560
+    - env: BOARD=due
+    - env: BOARD=leonardo
+    - env: BOARD=uno
+  allow_failures:
+    - env: BOARD=uno
+    - env: BOARD=due
+    - env: BOARD=leonardo
+
+install:
+  - pip install -U platformio
+  - platformio lib install "Wire"
+  - platformio lib install https://github.com/adafruit/Adafruit-PWM-Servo-Driver-Library.git
+  # download library to the temporary directory
+  #- wget https://github.com/adafruit/Adafruit-PWM-Servo-Driver-Library/archive/master.zip -O /tmp/Adafruit-PWM-Servo-Driver-Library_source.zip
+  #- unzip /tmp/Adafruit-PWM-Servo-Driver-Library_source.zip -d /tmp/
+
+script:
+# library example testing
+  #- set -eo pipefail;
+  #for e in examples/*; do
+  #  platformio ci --board=$BOARD --lib=. $e/*;
+  #done
+  platformio ci --board=$BOARD --lib="Adafruit-PWM-Servo-Driver-Library" ArrayESC.ino;
