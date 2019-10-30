@@ -1,5 +1,5 @@
-# ArrayESC
-[![Build Status](https://travis-ci.com/FireCastLabs/ArrayESC.svg?branch=master)](https://travis-ci.com/FireCastLabs/ArrayESC)
+# ArrayESC  [![Build Status](https://travis-ci.com/FireCastLabs/ArrayESC.svg?branch=master)](https://travis-ci.com/FireCastLabs/ArrayESC)
+
 A sketch repository for Controlling an Array of ESC driven motors with Adafruit PCA9685 16-Channel Servo Drivers
 
 ## Summary
