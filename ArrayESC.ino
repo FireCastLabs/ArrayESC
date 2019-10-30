@@ -16,7 +16,6 @@
 #include <Wire.h>
 #include <Adafruit_PWMServoDriver.h>
 
-
 // Instantiate the PWM extenders
 Adafruit_PWMServoDriver ESC = Adafruit_PWMServoDriver(0x40);
 //Adafruit_PWMServoDriver ESC2 = Adafruit_PWMServoDriver(0x41);
@@ -52,6 +51,64 @@ Adafruit_PWMServoDriver ESC = Adafruit_PWMServoDriver(0x40);
 //#define motorW 6
 //#define motorX 7
 //#define motorY 8
+
+int oESC;  // Variable for the speed sent to the ESC
+int oESCOld;
+
+void setup()
+{
+  Serial.begin(9600);
+  Serial.println("ESC I2C control!");
+
+  ESC.begin();
+  ESC.setPWMFreq(FREQ);  // Analog servos run at ~60 Hz updates
+
+  delay(10);
+  pinMode(13, OUTPUT);  // LED Visual Output
+  pinMode(23, OUTPUT);  // Pin for Reverse switch MotorA
+
+  arm(motorA);
+  //ESC.writeMicroseconds(motorA,500);// Send the Arm value so the ESC will be ready to take commands
+  digitalWrite(13, HIGH); // LED High Once Armed
+  delay(1000);  // Wait for a while
+  //ESC.writeMicroseconds(motorA, 1064);
+  speed(motorA, 1064);
+}
+
+void loop()
+{
+  if (Serial.available() > 0) // read the value from the serial
+  {
+    int oESC = Serial.parseInt();
+
+    if (oESC == 5)
+    {
+      digitalWrite(5, HIGH);
+      speed(motorA, 0);
+      speed(motorA, oESCOld);
+      Serial.print(oESCOld);
+      Serial.println(" speed");
+    }
+    else if (oESC == 6)
+    {
+      digitalWrite(5, LOW);
+      speed(motorA, 0);
+      speed(motorA, oESCOld);
+      Serial.print(oESCOld);
+      Serial.println(" speed");
+    }
+    else
+    {
+      //ESC.writeMicroseconds(motorA, oESC);
+      speed(motorA, oESC);
+      Serial.print(oESC);
+      Serial.println(" speed");
+    }
+
+    delay(10); // Wait for a while before restarting the serial parse
+  } 
+}
+
 /*
   Calibrate the maximum and minimum PWM signal the ESC is expecting
 */
@@ -89,34 +146,3 @@ void speed(int oPin, int outputESC)
   ESC.writeMicroseconds(oPin, oESC);
 }
 
-
-void setup() {
-  Serial.begin(9600);
-  Serial.println("ESC I2C control!");
-
-  ESC.begin();
-  ESC.setPWMFreq(FREQ);  // Analog servos run at ~60 Hz updates
-
-  delay(10);
-  pinMode(13, OUTPUT);  // LED Visual Output
-  arm(motorA);
-  //ESC.writeMicroseconds(motorA,500);// Send the Arm value so the ESC will be ready to take commands
-  digitalWrite(13, HIGH); // LED High Once Armed
-  delay(1000);  // Wait for a while
-  //ESC.writeMicroseconds(motorA, 1064);
-  speed(motorA, 1064);
-}
-
-void loop() {
-  if (Serial.available() > 0) // read the value from the serial
-  {
-    int oESC = Serial.parseInt();
-
-    //ESC.writeMicroseconds(motorA, oESC);
-    speed(motorA, oESC);
-    Serial.print(oESC);
-    Serial.println(" speed");
-
-    delay(10); 
-  } // Wait for a while before restart
-}
