@@ -18,19 +18,17 @@ matrix:
     - env: BOARD=leonardo
     - env: BOARD=uno
   allow_failures:
-    - env: BOARD=uno
     - env: BOARD=due
     - env: BOARD=leonardo
 
 install:
   - pip install -U platformio
-  #- platformio lib install "wire"
   - platformio lib install "Adafruit PWM Servo Driver Library"
 
 
-script:
 # library example testing
-  #- set -eo pipefail;
+script:
+#- set -eo pipefail;
   #for e in examples/*; do
   #  platformio ci --board=$BOARD --lib=. $e/*;
   #done
