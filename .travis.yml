@@ -32,4 +32,4 @@ script:
   #for e in examples/*; do
   #  platformio ci --board=$BOARD --lib=. $e/*;
   #done
-  platformio ci --board=$BOARD --lib="I2C_ESC" ArrayESC.ino;
+  platformio ci --board=$BOARD --lib="." ArrayESC.ino;
