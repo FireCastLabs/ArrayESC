@@ -12,67 +12,112 @@
 
 
  ****************************************************/
+#include <I2C_ESC.h>
 
-#include <Wire.h>
-#include <Adafruit_PWMServoDriver.h>
-
-// Instantiate the PWM extenders
-Adafruit_PWMServoDriver ESC = Adafruit_PWMServoDriver(0x40);
-//Adafruit_PWMServoDriver ESC2 = Adafruit_PWMServoDriver(0x41);
-
-#define FREQ 60 // Analog servos run at ~60 Hz updates
-#define OUTPUTMIN 1000
-#define OUTPUTMAX 2000
-#define ARMVAL 500
-#define ESC_CAL_DELAY 8000
-#define ESC_STOP_PULSE 500
-#define motorA 0
-#define motorB 1
-#define motorC 2
-#define motorD 3
-#define motorE 4
-#define motorF 5
-#define motorG 6
-#define motorH 7
-#define motorI 8
-#define motorJ 9
-#define motorK 10
-#define motorL 11
-#define motorM 12
-#define motorN 13
-#define motorO 14
-#define motorP 15
-//#define motorQ 0
-//#define motorR 1
-//#define motorS 2
-//#define motorT 3
-//#define motorU 4
-//#define motorV 5
-//#define motorW 6
-//#define motorX 7
-//#define motorY 8
+#define LED_PIN (13)            // Pin for the LED 
+#define SERVO_FREQ (60)         // Analog servos run at ~60 Hz updates
+#define SPEED_MIN (1000)        // Set the Minimum Speed in microseconds
+#define SPEED_MAX (2000)        // Set the Maximum Speed in microseconds
+#define ARM_VALUE (500)         // Set the Arm value in microseconds
 
 int oESC;  // Variable for the speed sent to the ESC
-int oESCOld;
+
+/*
+ * Instantiate the PWM extenders
+ * ESC_Name (I2C_address, ESC PIN, Minimum Value, Maximum Value, Default Speed, Arm Value)
+ * 8 ESC/motors per I2C PWM/Servo extender, 16 signals with 1 for motor and 1 for reverse pin
+ */
+I2C_ESC motorA (0x40, 0, 1, SPEED_MIN, SPEED_MAX, ARM_VALUE);
+I2C_ESC motorB (0x40, 2, 3, SPEED_MIN, SPEED_MAX, ARM_VALUE);
+I2C_ESC motorC (0x40, 4, 5, SPEED_MIN, SPEED_MAX, ARM_VALUE);
+I2C_ESC motorD (0x40, 6, 7, SPEED_MIN, SPEED_MAX, ARM_VALUE);
+I2C_ESC motorE (0x40, 8, 9, SPEED_MIN, SPEED_MAX, ARM_VALUE);
+I2C_ESC motorF (0x40, 10, 11, SPEED_MIN, SPEED_MAX, ARM_VALUE);
+I2C_ESC motorG (0x40, 12, 13, SPEED_MIN, SPEED_MAX, ARM_VALUE);
+I2C_ESC motorH (0x40, 14, 15, SPEED_MIN, SPEED_MAX, ARM_VALUE);
+I2C_ESC motorI (0x41, 0, 1, SPEED_MIN, SPEED_MAX, ARM_VALUE);
+I2C_ESC motorJ (0x41, 2, 3, SPEED_MIN, SPEED_MAX, ARM_VALUE);
+I2C_ESC motorK (0x41, 4, 5, SPEED_MIN, SPEED_MAX, ARM_VALUE);
+I2C_ESC motorL (0x41, 6, 7, SPEED_MIN, SPEED_MAX, ARM_VALUE);
+I2C_ESC motorM (0x41, 8, 9, SPEED_MIN, SPEED_MAX, ARM_VALUE);
+I2C_ESC motorN (0x41, 10, 11, SPEED_MIN, SPEED_MAX, ARM_VALUE);
+I2C_ESC motorO (0x41, 12, 13, SPEED_MIN, SPEED_MAX, ARM_VALUE);
+I2C_ESC motorP (0x41, 14, 15, SPEED_MIN, SPEED_MAX, ARM_VALUE);
+I2C_ESC motorQ (0x42, 0, 1, SPEED_MIN, SPEED_MAX, ARM_VALUE);
+I2C_ESC motorR (0x42, 2, 3, SPEED_MIN, SPEED_MAX, ARM_VALUE);
+I2C_ESC motorS (0x42, 4, 5, SPEED_MIN, SPEED_MAX, ARM_VALUE);
+I2C_ESC motorT (0x42, 6, 7, SPEED_MIN, SPEED_MAX, ARM_VALUE);
+I2C_ESC motorU (0x42, 8, 9, SPEED_MIN, SPEED_MAX, ARM_VALUE);
+I2C_ESC motorV (0x42, 10, 11, SPEED_MIN, SPEED_MAX, ARM_VALUE);
+I2C_ESC motorW (0x42, 12, 13, SPEED_MIN, SPEED_MAX, ARM_VALUE);
+I2C_ESC motorX (0x42, 14, 15, SPEED_MIN, SPEED_MAX, ARM_VALUE);
+I2C_ESC motorY (0x43, 0, 1, SPEED_MIN, SPEED_MAX, ARM_VALUE);
+
 
 void setup()
 {
   Serial.begin(9600);
   Serial.println("ESC I2C control!");
 
-  ESC.begin();
-  ESC.setPWMFreq(FREQ);  // Analog servos run at ~60 Hz updates
+  // Analog servos run at ~60 Hz updates begin prescale at 105 to get approximatly 60Hz
+  motorA.begin(105);
+  motorB.begin(105);
+  motorC.begin(105);
+  motorD.begin(105);
+  motorE.begin(105);
+  motorF.begin(105);
+  motorG.begin(105);
+  motorH.begin(105);
+  motorI.begin(105);
+  motorJ.begin(105);
+  motorK.begin(105);
+  motorL.begin(105);
+  motorM.begin(105);
+  motorN.begin(105);
+  motorO.begin(105);
+  motorP.begin(105);
+  motorQ.begin(105);
+  motorR.begin(105);
+  motorS.begin(105);
+  motorT.begin(105);
+  motorU.begin(105);
+  motorV.begin(105);
+  motorW.begin(105);
+  motorX.begin(105);
+  motorY.begin(105);
 
   delay(10);
   pinMode(13, OUTPUT);  // LED Visual Output
-  pinMode(23, OUTPUT);  // Pin for Reverse switch MotorA
 
-  arm(motorA);
-  //ESC.writeMicroseconds(motorA,500);// Send the Arm value so the ESC will be ready to take commands
+  // Arm the motors
+  motorA.arm();
+  motorB.arm();
+  motorC.arm();
+  motorD.arm();
+  motorE.arm();
+  motorF.arm();
+  motorG.arm();
+  motorH.arm();
+  motorI.arm();
+  motorJ.arm();
+  motorK.arm();
+  motorL.arm();
+  motorM.arm();
+  motorN.arm();
+  motorO.arm();
+  motorP.arm();
+  motorQ.arm();
+  motorR.arm();
+  motorS.arm();
+  motorT.arm();
+  motorU.arm();
+  motorV.arm();
+  motorW.arm();
+  motorX.arm();
+  motorY.arm();
+
   digitalWrite(13, HIGH); // LED High Once Armed
   delay(1000);  // Wait for a while
-  //ESC.writeMicroseconds(motorA, 1064);
-  speed(motorA, 1064);
 }
 
 void loop()
@@ -80,69 +125,69 @@ void loop()
   if (Serial.available() > 0) // read the value from the serial
   {
     int oESC = Serial.parseInt();
-
     if (oESC == 5)
     {
-      digitalWrite(5, HIGH);
-      speed(motorA, 0);
-      speed(motorA, oESCOld);
-      Serial.print(oESCOld);
-      Serial.println(" speed");
-    }
-    else if (oESC == 6)
-    {
-      digitalWrite(5, LOW);
-      speed(motorA, 0);
-      speed(motorA, oESCOld);
-      Serial.print(oESCOld);
-      Serial.println(" speed");
+      Serial.println("stopping and setting all ESCs to reverse mode");
+      myESC.reverse();
+      myESC1.reverse();
+      motorA.reverse();
+      motorB.reverse();
+      motorC.reverse();
+      motorD.reverse();
+      motorE.reverse();
+      motorF.reverse();
+      motorG.reverse();
+      motorH.reverse();
+      motorI.reverse();
+      motorJ.reverse();
+      motorK.reverse();
+      motorL.reverse();
+      motorM.reverse();
+      motorN.reverse();
+      motorO.reverse();
+      motorP.reverse();
+      motorQ.reverse();
+      motorR.reverse();
+      motorS.reverse();
+      motorT.reverse();
+      motorU.reverse();
+      motorV.reverse();
+      motorW.reverse();
+      motorX.reverse();
+      motorY.reverse();
     }
     else
     {
-      //ESC.writeMicroseconds(motorA, oESC);
-      speed(motorA, oESC);
+      motorA.speed(oESC);
+      motorB.speed(oESC);
+      motorC.speed(oESC);
+      motorD.speed(oESC);
+      motorE.speed(oESC);
+      motorF.speed(oESC);
+      motorG.speed(oESC);
+      motorH.speed(oESC);
+      motorI.speed(oESC);
+      motorJ.speed(oESC);
+      motorK.speed(oESC);
+      motorL.speed(oESC);
+      motorM.speed(oESC);
+      motorN.speed(oESC);
+      motorO.speed(oESC);
+      motorP.speed(oESC);
+      motorQ.speed(oESC);
+      motorR.speed(oESC);
+      motorS.speed(oESC);
+      motorT.speed(oESC);
+      motorU.speed(oESC);
+      motorV.speed(oESC);
+      motorW.speed(oESC);
+      motorX.speed(oESC);
+      motorY.speed(oESC);
       Serial.print(oESC);
-      Serial.println(" speed");
+      Serial.println(" speed for all ESCs");
     }
+  }
 
     delay(10); // Wait for a while before restarting the serial parse
   } 
 }
-
-/*
-  Calibrate the maximum and minimum PWM signal the ESC is expecting
-*/
-void calib(int oPin)
-{
-  ESC.writeMicroseconds(oPin, OUTPUTMAX);
-    delay(ESC_CAL_DELAY);
-  ESC.writeMicroseconds(oPin, OUTPUTMIN);
-    delay(ESC_CAL_DELAY);
-  arm(oPin);
-}
-
-/*
-  Arm the ESC
-*/
-void arm(int oPin)
-{
-  ESC.writeMicroseconds(oPin, ARMVAL);
-}
-
-/*
-  Stop the ESC with the specified PWM signal the ESC is expecting
-*/
-void stop(int oPin)
-{
-  ESC.writeMicroseconds(oPin, ESC_STOP_PULSE);
-}
-
-/*
-  Set the ESC Speed with the specified PWM signal the ESC is expecting
-*/
-void speed(int oPin, int outputESC)
-{
-  int oESC = constrain(outputESC, OUTPUTMIN, OUTPUTMAX);
-  ESC.writeMicroseconds(oPin, oESC);
-}
-
