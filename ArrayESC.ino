@@ -26,6 +26,7 @@ int oESC;  // Variable for the speed sent to the ESC
  * Instantiate the PWM extenders
  * ESC_Name (I2C_address, ESC PIN, Minimum Value, Maximum Value, Default Speed, Arm Value)
  * 8 ESC/motors per I2C PWM/Servo extender, 16 signals with 1 for motor and 1 for reverse pin
+ * Total 4 I2C PWM/Servo extenders for the 25 motors
  */
 I2C_ESC motorA (0x40, 0, 1, SPEED_MIN, SPEED_MAX, ARM_VALUE);
 I2C_ESC motorB (0x40, 2, 3, SPEED_MIN, SPEED_MAX, ARM_VALUE);
@@ -59,7 +60,7 @@ void setup()
   Serial.begin(9600);
   Serial.println("ESC I2C control!");
 
-  // Analog servos run at ~60 Hz updates begin prescale at 105 to get approximatly 60Hz
+  // Analog servos run at ~60 Hz updates, begin prescale at 105 to get approximatly 60Hz
   motorA.begin(105);
   motorB.begin(105);
   motorC.begin(105);
@@ -128,8 +129,6 @@ void loop()
     if (oESC == 5)
     {
       Serial.println("stopping and setting all ESCs to reverse mode");
-      myESC.reverse();
-      myESC1.reverse();
       motorA.reverse();
       motorB.reverse();
       motorC.reverse();
