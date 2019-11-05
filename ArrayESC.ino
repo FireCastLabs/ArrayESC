@@ -25,8 +25,8 @@ int oESC;  // Variable for the speed sent to the ESC
 /*
  * Instantiate the PWM extenders
  * ESC_Name (I2C_address, ESC PIN, Minimum Value, Maximum Value, Default Speed, Arm Value)
- * 8 ESC/motors per I2C PWM/Servo extender, 16 signals with 1 for motor and 1 for reverse pin
- * Total 4 I2C PWM/Servo extenders for the 25 motors
+ * 8 ESC/motors per I2C PWM/Servo extender, 16 signals per extender 2 lines per ESC with 1 for motor and 1 for reverse pin
+ * Total 4 I2C PWM/Servo extenders for the 25 motors leaving 13 available signals
  */
 I2C_ESC motorA (0x40, 0, 1, SPEED_MIN, SPEED_MAX, ARM_VALUE);
 I2C_ESC motorB (0x40, 2, 3, SPEED_MIN, SPEED_MAX, ARM_VALUE);
@@ -53,7 +53,6 @@ I2C_ESC motorV (0x42, 10, 11, SPEED_MIN, SPEED_MAX, ARM_VALUE);
 I2C_ESC motorW (0x42, 12, 13, SPEED_MIN, SPEED_MAX, ARM_VALUE);
 I2C_ESC motorX (0x42, 14, 15, SPEED_MIN, SPEED_MAX, ARM_VALUE);
 I2C_ESC motorY (0x43, 0, 1, SPEED_MIN, SPEED_MAX, ARM_VALUE);
-
 
 void setup()
 {
@@ -187,6 +186,5 @@ void loop()
     }
   }
 
-    delay(10); // Wait for a while before restarting the serial parse
-  } 
+  delay(10); // Wait for a while before restarting the loop
 }
