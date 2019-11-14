@@ -64,31 +64,11 @@ void setup()
    * Very importaint to only enter prescale for the PWM frequency with one motor on the chip.
    * Multiple setting of the frequency on the I2C PCA9685 PWM/Servo extender chip is likely to cause
    * unusual behavior
+   * begin() calls the wire.begin() and should only be done once per chipset
    */
   motorA.begin(105); // First Chip set
-  motorB.begin();
-  motorC.begin();
-  motorD.begin();
-  motorE.begin();
-  motorF.begin();
-  motorG.begin();
-  motorH.begin();
   motorI.begin(105); // Second Chip set
-  motorJ.begin();
-  motorK.begin();
-  motorL.begin();
-  motorM.begin();
-  motorN.begin();
-  motorO.begin();
-  motorP.begin();
   motorQ.begin(105); // Third Chip set
-  motorR.begin();
-  motorS.begin();
-  motorT.begin();
-  motorU.begin();
-  motorV.begin();
-  motorW.begin();
-  motorX.begin();
   motorY.begin(105); // Fourth chip set
 
   /*
