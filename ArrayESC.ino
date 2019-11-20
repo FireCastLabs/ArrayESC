@@ -19,8 +19,10 @@
 #define SPEED_MIN (1000)        // Set the Minimum Speed in microseconds
 #define SPEED_MAX (2000)        // Set the Maximum Speed in microseconds
 #define ARM_VALUE (500)         // Set the Arm value in microseconds
+#define POT_PIN (A0)            // Analog pin used to connect the potentiometer
 
-int oESC;  // Variable for the speed sent to the ESC
+int potVal;                     // Variable to read the value from the analog pin
+int oESC;                       // Variable for the speed sent to the ESC
 
 /*
  * Instantiate the PWM extenders
@@ -179,6 +181,51 @@ void loop()
       motorW.reverse();
       motorX.reverse();
       motorY.reverse();
+    }
+    else if (oESC == 15)
+    {
+      while (1)
+      {
+        potVal = analogRead(POT_PIN);         // reads the value of the potentiometer (value between 0 and 1023)
+        potVal = map(potVal, 0, 1023, SPEED_MIN, SPEED_MAX);  // scale it to use it with the ESC (value between Minimum and Maximum)
+        myESC.speed(potVal);                  // sets the ESC speed according to the scaled value
+        motorA.speed(potVal);
+        motorB.speed(potVal);
+        motorC.speed(potVal);
+        motorD.speed(potVal);
+        motorE.speed(potVal);
+        motorF.speed(potVal);
+        motorG.speed(potVal);
+        motorH.speed(potVal);
+        motorI.speed(potVal);
+        motorJ.speed(potVal);
+        motorK.speed(potVal);
+        motorL.speed(potVal);
+        motorM.speed(potVal);
+        motorN.speed(potVal);
+        motorO.speed(potVal);
+        motorP.speed(potVal);
+        motorQ.speed(potVal);
+        motorR.speed(potVal);
+        motorS.speed(potVal);
+        motorT.speed(potVal);
+        motorU.speed(potVal);
+        motorV.speed(potVal);
+        motorW.speed(potVal);
+        motorX.speed(potVal);
+        motorY.speed(potVal);
+        Serial.print(potVal);
+        Serial.println(" speed for all ESCs over pot");
+        if (Serial.available() > 0)                             // read the value from the serial
+        {
+          oESC = Serial.parseInt();
+          
+          if (oESC == 20)
+          {
+            break;
+          }
+        }
+      }
     }
     else
     {
