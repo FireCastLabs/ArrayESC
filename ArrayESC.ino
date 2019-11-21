@@ -15,11 +15,10 @@
 #include <I2C_ESC.h>
 
 #define LED_PIN (13)            // Pin for the LED 
-#define SERVO_FREQ (60)         // Analog servos run at ~60 Hz updates
+#define SERVO_FREQ (50)         // Analog servos run at ~50 Hz updates
 #define SPEED_MIN (1000)        // Set the Minimum Speed in microseconds
 #define SPEED_MAX (2000)        // Set the Maximum Speed in microseconds
 #define ARM_VALUE (500)         // Set the Arm value in microseconds
-#define SERVO_FREQ (50)         // Analog servos run at ~50 Hz updates
 #define POT_PIN (A0)            // Analog pin used to connect the potentiometer
 
 int potVal;                     // Variable to read the value from the analog pin
@@ -199,7 +198,7 @@ void loop()
       {
         potVal = analogRead(POT_PIN);         // reads the value of the potentiometer (value between 0 and 1023)
         potVal = map(potVal, 0, 1023, SPEED_MIN, SPEED_MAX);  // scale it to use it with the ESC (value between Minimum and Maximum)
-        myESC.speed(potVal);                  // sets the ESC speed according to the scaled value
+        // sets the Array ESC speed according to the scaled value from the potentiometer
         motorA.speed(potVal);
         motorB.speed(potVal);
         motorC.speed(potVal);
