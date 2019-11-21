@@ -19,6 +19,7 @@
 #define SPEED_MIN (1000)        // Set the Minimum Speed in microseconds
 #define SPEED_MAX (2000)        // Set the Maximum Speed in microseconds
 #define ARM_VALUE (500)         // Set the Arm value in microseconds
+#define SERVO_FREQ (50)         // Analog servos run at ~50 Hz updates
 #define POT_PIN (A0)            // Analog pin used to connect the potentiometer
 
 int potVal;                     // Variable to read the value from the analog pin
@@ -68,10 +69,10 @@ void setup()
    * unusual behavior
    * begin() calls the wire.begin() and should only be done once per chipset
    */
-  motorA.begin(105); // First Chip set
-  motorI.begin(105); // Second Chip set
-  motorQ.begin(105); // Third Chip set
-  motorY.begin(105); // Fourth chip set
+  motorA.begin(); // First Chip set
+  motorI.begin(); // Second Chip set
+  motorQ.begin(); // Third Chip set
+  motorY.begin(); // Fourth chip set
 
   /*
    * In theory the internal oscillator (clock) is 25MHz but it really isn't that precise. 
@@ -83,6 +84,16 @@ void setup()
   motorI.setOscillatorFrequency(26075000); // Second Chip set
   motorQ.setOscillatorFrequency(26075000); // Third Chip set
   motorY.setOscillatorFrequency(26075000); // Fourth chip set
+
+ /*
+  * Set the analog servo PWM frequency
+  * alternativly you could set this using the prescale 50Hz is a prescale of about ### (depending on the internal oscillator frequency)
+  * This is only done once per Adafruit PCA9685 PWM/Servo driver
+  */
+  motorA.setPWMFreq(SERVO_FREQ);
+  motorI.setPWMFreq(SERVO_FREQ);
+  motorQ.setPWMFreq(SERVO_FREQ);
+  motorY.setPWMFreq(SERVO_FREQ);
 
   delay(10); // Set a small delay to allow the PCA9685 chips time to set their frequency
   pinMode(13, OUTPUT);  // LED Visual Output pin
