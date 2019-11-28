@@ -18,7 +18,7 @@
 
 #define LED_PIN (13)            // Pin for the LED 
 #define SERVO_FREQ (50)         // Analog servos run at ~50 Hz updates
-#define SPEED_MIN (1000)        // Set the Minimum Speed in microseconds
+#define SPEED_MIN (1000)        // Set the Zero Throttle Speed in microseconds
 #define SPEED_MAX (2000)        // Set the Maximum Speed in microseconds
 #define ARM_VALUE (500)         // Set the Arm value in microseconds
 #define POT_PIN (A0)            // Analog pin used to connect the potentiometer
@@ -41,7 +41,7 @@ boolean newData = false;
 
 /*
  * Instantiate the PWM extenders
- * ESC_Name (I2C_address, ESC PIN, Minimum Value, Maximum Value, Default Speed, Arm Value)
+ * ESC_Name (I2C_address, ESC PIN, reverse pin, Zero throttle Value, Maximum Value, Arm Value)
  * 8 ESC/motors per I2C PWM/Servo extender, 16 signals per extender 2 lines per ESC with 1 for motor and 1 for reverse pin
  * Total 4 I2C PWM/Servo extenders for the 25 motors leaving 13 available signals
  */
@@ -80,11 +80,10 @@ void setup()
   Serial.println()
 
   /*
-   * Analog servos run at ~60 Hz updates, begin prescale at 105 to get approximatly 60Hz
-   * Very importaint to only enter prescale for the PWM frequency with one motor on the chip.
-   * Multiple setting of the frequency on the I2C PCA9685 PWM/Servo extender chip is likely to cause
+   * Multiple setting of the I2C bus on the I2C PCA9685 PWM/Servo extender chip is likely to cause
    * unusual behavior
    * begin() calls the wire.begin() and should only be done once per chipset
+   * Analog servos run at ~50 Hz updates, begin prescale at ### to get approximatly 50Hz
    */
   motorA.begin(); // First Chip set
   motorI.begin(); // Second Chip set
@@ -94,23 +93,65 @@ void setup()
   /*
    * In theory the internal oscillator (clock) is 25MHz but it really isn't that precise. 
    * You can 'calibrate' by tweaking this number till you get the frequency you're expecting!
-   * The int.osc. is closer to 27MHz and is used for calculating things like writeMicroseconds
-   * We only need to do this once per chipset
+   * The int.osc. a range between about 23-27MHz and is used for calculating things like writeMicroseconds
+   * We need to do this for each library instance as it is used in internal library calculations
    */
-  motorA.setOscillatorFrequency(26075000); // First Chip set
-  motorI.setOscillatorFrequency(26075000); // Second Chip set
+  motorA.setOscillatorFrequency(24675000); // First Chip set
+  motorB.setOscillatorFrequency(24675000);
+  motorC.setOscillatorFrequency(24675000);
+  motorD.setOscillatorFrequency(24675000);
+  motorE.setOscillatorFrequency(24675000);
+  motorF.setOscillatorFrequency(24675000);
+  motorG.setOscillatorFrequency(24675000);
+  motorH.setOscillatorFrequency(24675000);
+  motorI.setOscillatorFrequency(25000000); // Second Chip set
+  motorJ.setOscillatorFrequency(25000000);
+  motorK.setOscillatorFrequency(25000000);
+  motorL.setOscillatorFrequency(25000000);
+  motorM.setOscillatorFrequency(25000000);
+  motorN.setOscillatorFrequency(25000000);
+  motorO.setOscillatorFrequency(25000000);
+  motorP.setOscillatorFrequency(25000000);
   motorQ.setOscillatorFrequency(26075000); // Third Chip set
+  motorR.setOscillatorFrequency(24675000);
+  motorS.setOscillatorFrequency(24675000);
+  motorT.setOscillatorFrequency(24675000);
+  motorU.setOscillatorFrequency(24675000);
+  motorV.setOscillatorFrequency(24675000);
+  motorW.setOscillatorFrequency(24675000);
+  motorX.setOscillatorFrequency(24675000);
   motorY.setOscillatorFrequency(26075000); // Fourth chip set
 
  /*
   * Set the analog servo PWM frequency
   * alternativly you could set this using the prescale 50Hz is a prescale of about ### (depending on the internal oscillator frequency)
-  * This is only done once per Adafruit PCA9685 PWM/Servo driver
+  * We need to do this for each library instance as it is used in internal library calculations
   */
-  motorA.setPWMFreq(SERVO_FREQ);
-  motorI.setPWMFreq(SERVO_FREQ);
-  motorQ.setPWMFreq(SERVO_FREQ);
-  motorY.setPWMFreq(SERVO_FREQ);
+  motorA.setPWMFreq(SERVO_FREQ); // First Chip set
+  motorB.setPWMFreq(SERVO_FREQ);
+  motorC.setPWMFreq(SERVO_FREQ);
+  motorD.setPWMFreq(SERVO_FREQ);
+  motorE.setPWMFreq(SERVO_FREQ);
+  motorF.setPWMFreq(SERVO_FREQ);
+  motorG.setPWMFreq(SERVO_FREQ);
+  motorH.setPWMFreq(SERVO_FREQ);
+  motorI.setPWMFreq(SERVO_FREQ); // Second Chip set
+  motorJ.setPWMFreq(SERVO_FREQ);
+  motorK.setPWMFreq(SERVO_FREQ);
+  motorL.setPWMFreq(SERVO_FREQ);
+  motorM.setPWMFreq(SERVO_FREQ);
+  motorN.setPWMFreq(SERVO_FREQ);
+  motorO.setPWMFreq(SERVO_FREQ);
+  motorP.setPWMFreq(SERVO_FREQ);
+  motorQ.setPWMFreq(SERVO_FREQ); // Third Chip set
+  motorR.setPWMFreq(SERVO_FREQ);
+  motorS.setPWMFreq(SERVO_FREQ);
+  motorT.setPWMFreq(SERVO_FREQ);
+  motorU.setPWMFreq(SERVO_FREQ);
+  motorV.setPWMFreq(SERVO_FREQ);
+  motorW.setPWMFreq(SERVO_FREQ);
+  motorX.setPWMFreq(SERVO_FREQ);
+  motorY.setPWMFreq(SERVO_FREQ); // Fourth chip set
 
   delay(10); // Set a small delay to allow the PCA9685 chips time to set their frequency
   pinMode(13, OUTPUT);  // LED Visual Output pin
@@ -143,7 +184,7 @@ void setup()
   motorY.arm();
 
   digitalWrite(13, HIGH); // LED High Once ESCs are Armed
-  delay(5000);  // Wait for a while
+  delay(5000); // Wait for a while for all ESCs to be ready for commands
 
   /*
    * Set ESCs to minimum speed now that the ESCs should be Armed

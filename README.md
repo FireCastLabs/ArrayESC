@@ -20,10 +20,14 @@ Adafruit PCA9685 16-Channel Servo Drivers can be purchased on [Adafruit’s webs
 
 - no new functions have been added yet.
 serial input commands
-- 500 arm and stop
+- 5
+  - stop and reverse; must send 1000 once stopped then new speed command.
+- 15
+  - enter single potentiometer control
+  - entering 20 while in potentiometer control will exit potentiometer control
+- 1000 Zero throttle value and stops all motors
 - 1050 aproximate minimum speed
 - 2000 maximum speed
-- 5 stop and set to ESC to reverse; must send 500 once stopped then new speed command 
-  
+
   ## Version History
   - no releases have been made yet
