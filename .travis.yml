@@ -23,7 +23,7 @@ matrix:
 
 install:
   - pip install -U platformio
-  - platformio lib install https://github.com/adafruit/Adafruit-PWM-Servo-Driver-Library.git https://github.com/FireCastLabs/I2C_ESC.git
+  - platformio lib install https://github.com/adafruit/Adafruit-PWM-Servo-Driver-Library.git https://github.com/FireCastLabs/I2C_Array_ESC.git
 
 
 # library example testing
