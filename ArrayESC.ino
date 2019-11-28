@@ -77,7 +77,7 @@ void setup()
   Serial.println("ESC I2C control!");
   Serial.println("This demo expects 3 pieces of data - text, an integer and a floating point value");
   Serial.println("Enter data in this style <HelloWorld, 12, 24.7>  ");
-  Serial.println()
+  Serial.println();
 
   /*
    * Multiple setting of the I2C bus on the I2C PCA9685 PWM/Servo extender chip is likely to cause
