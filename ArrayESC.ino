@@ -138,7 +138,7 @@ void loop()
       motorsAH.speedArray(oESC);
       motorsIP.speedArray(oESC);
       motorsQX.speedArray(oESC);
-      motorsY.speedArray(0, oESC);
+      motorsY.speed(0, oESC);
       Serial.print(oESC);
       Serial.println(" speed for all ESCs");
     }
