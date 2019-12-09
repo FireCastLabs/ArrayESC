@@ -61,8 +61,8 @@ void setup()
    */
   motorsAH.setOscillatorFrequency(24600000); // First Chip set
   motorsIP.setOscillatorFrequency(25000000); // Second Chip set
-  motorsQX.setOscillatorFrequency(26075000); // Third Chip set
-  motorsY.setOscillatorFrequency(26075000); // Fourth chip set
+  motorsQX.setOscillatorFrequency(24060000); // Third Chip set
+  motorsY.setOscillatorFrequency(24090000); // Fourth chip set
 
  /*
   * Set the analog servo PWM frequency
