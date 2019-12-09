@@ -73,9 +73,15 @@ void setup()
 
   /*
    * In theory the internal oscillator (clock) is 25MHz but it really isn't that precise. 
-   * You can 'calibrate' by tweaking this number till you get the frequency you're expecting!
-   * The int.osc. a range between about 23-27MHz and is used for calculating things like writeMicroseconds
-   * We need to do this for each library instance as it is used in internal library calculations
+   * You must 'calibrate' by tweaking this number until you get the PWM update frequency you're expecting!
+   * The int.osc. is used for calculating things like writeMicroseconds
+   * Analog servos run at ~50 Hz updates, It is very importaint to use an oscilloscope in setting the frequency 
+   * for the I2C PCA9685 PWM/Servo extender chip. 
+   * 1) Attach the oscilloscope to one of the PWM signal pin and ground on the I2C PCA9685 chip you are setting the value for.
+   * 2) Adjust setOscillatorFrequency() until the PWM update frequency is the expected value (50Hz for most ESCs)
+   * Setting the value here is specific to each individual I2C PCA9685 chip and affects the calculations for the PWM update frequency.
+   * Failure to correctly set this value will cause unusual behavior in the ESCs
+   * We need to do this for each chipset and library instance
    */
   motorA.setOscillatorFrequency(24675000); // First Chip set
   motorB.setOscillatorFrequency(24675000);
@@ -93,15 +99,15 @@ void setup()
   motorN.setOscillatorFrequency(25000000);
   motorO.setOscillatorFrequency(25000000);
   motorP.setOscillatorFrequency(25000000);
-  motorQ.setOscillatorFrequency(26075000); // Third Chip set
-  motorR.setOscillatorFrequency(24675000);
-  motorS.setOscillatorFrequency(24675000);
-  motorT.setOscillatorFrequency(24675000);
-  motorU.setOscillatorFrequency(24675000);
-  motorV.setOscillatorFrequency(24675000);
-  motorW.setOscillatorFrequency(24675000);
-  motorX.setOscillatorFrequency(24675000);
-  motorY.setOscillatorFrequency(26075000); // Fourth chip set
+  motorQ.setOscillatorFrequency(24060000); // Third Chip set
+  motorR.setOscillatorFrequency(24060000);
+  motorS.setOscillatorFrequency(24060000);
+  motorT.setOscillatorFrequency(24060000);
+  motorU.setOscillatorFrequency(24060000);
+  motorV.setOscillatorFrequency(24060000);
+  motorW.setOscillatorFrequency(24060000);
+  motorX.setOscillatorFrequency(24060000);
+  motorY.setOscillatorFrequency(24090000); // Fourth chip set
 
  /*
   * Set the analog servo PWM frequency
