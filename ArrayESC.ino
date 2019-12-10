@@ -13,15 +13,20 @@
 *****************************************************/
 #include <I2C_Array_ESC.h>
 
-#define LED_PIN (13)            // Pin for the LED 
-#define SERVO_FREQ (50)         // Analog servos run at ~50 Hz updates
-#define SPEED_MIN (1000)        // Set the Zero throttle Speed in microseconds
-#define SPEED_MAX (2000)        // Set the Maximum throttle Speed in microseconds
-#define ARM_VALUE (500)         // Set the Arm value in microseconds
-#define POT_PIN (A0)            // Analog pin used to connect the potentiometer
+#define LED_PIN (13)       // Pin for the LED 
+#define SERVO_FREQ (50)    // Analog servos run at ~50 Hz updates
+#define SPEED_MIN (1000)   // Set the Zero throttle Speed in microseconds
+#define SPEED_MAX (2000)   // Set the Maximum throttle Speed in microseconds
+#define ARM_VALUE (500)    // Set the Arm value in microseconds
+#define POT_PIN (A0)       // Analog pin used to connect the potentiometer
+#define SWITCH0_PIN (2)    // Analog pin used to connect the switch
+#define SWITCH1_PIN (3)    // Analog pin used to connect the switch
 
-int potVal;                     // Variable to read the value from the analog pin
-int oESC;                       // Variable for the speed sent to the ESC
+int potVal;                // Variable to read the value from the analog pin
+int oESC;                  // Variable for the speed sent to the ESC
+int switch0State = 0;      // variable for reading the switch status
+int switch1State = 0;      // variable for reading the switch status
+
 
 /*
  * Instantiate the PWM extenders
@@ -39,13 +44,17 @@ void setup()
   Serial.begin(9600);
   Serial.println("ESC I2C control!");
 
+  // Initialize the switch pins as an input:
+  pinMode(SWITCH0_PIN, INPUT);
+  pinMode(SWITCH1_PIN, INPUT);
+
   /*
    * begin() calls the wire.begin() and is only done once per chipset
    */
   motorsAH.begin(); // First Chip set
   motorsIP.begin(); // Second Chip set
   motorsQX.begin(); // Third Chip set
-  motorsY.begin(); // Fourth chip set
+  motorsY.begin();  // Fourth chip set
 
   /*
    * In theory the internal oscillator (clock) is 25MHz but it really isn't that precise. 
@@ -62,7 +71,7 @@ void setup()
   motorsAH.setOscillatorFrequency(24600000); // First Chip set
   motorsIP.setOscillatorFrequency(25000000); // Second Chip set
   motorsQX.setOscillatorFrequency(26075000); // Third Chip set
-  motorsY.setOscillatorFrequency(26075000); // Fourth chip set
+  motorsY.setOscillatorFrequency(26075000);  // Fourth chip set
 
  /*
   * Set the analog servo PWM frequency
@@ -98,6 +107,37 @@ void setup()
 
 void loop()
 {
+
+  // Read the state of the SWITCH_PIN value:
+  switch0State = digitalRead(SWITCH0_PIN);
+  switch1State = digitalRead(SWITCH1_PIN);
+
+  // Check if the stop switch is flipped. If it is, the switch0State is HIGH:
+  if (switch0State == HIGH)
+  {
+    // turn motors off by setting to zero throttle:
+    motorsAH.speedArray(SPEED_MIN);
+    motorsIP.speedArray(SPEED_MIN);
+    motorsQX.speedArray(SPEED_MIN);
+    motorsY.speed(ESC_PIN, SPEED_MIN);
+    delay(5000);  // Wait for a while for ESCs to be ready for all further commands
+  }
+
+  // Check if only the pot switch is flipped. If it is, the switch1State is HIGH, and the stop switch is not HIGH:
+  if (switch1State == HIGH && switch0State != HIGH)
+  {
+    potVal = analogRead(POT_PIN);         // reads the value of the potentiometer (value between 0 and 1023)
+    potVal = map(potVal, 1023, 951, SPEED_MIN, SPEED_MAX);  // scale the log pot to use it with the ESC (value between Minimum and Maximum)
+    potVal = constrain (potVal, SPEED_MIN, SPEED_MAX);
+    // sets the ESC speed according to the scaled value
+    motorsAH.speedArray(potVal);
+    motorsIP.speedArray(potVal);
+    motorsQX.speedArray(potVal);
+    motorsY.speed(ESC_PIN, potVal);
+    Serial.print(potVal);
+    Serial.println(" speed for all ESCs over pot");
+  }
+
   if (Serial.available() > 0) // read the value from the serial
   {
     int oESC = Serial.parseInt();
