@@ -1,9 +1,9 @@
 # ArrayESC  [![Build Status](https://travis-ci.com/FireCastLabs/ArrayESC.svg?branch=master)](https://travis-ci.com/FireCastLabs/ArrayESC)
 
-A sketch repository for Controlling an Array of 25 ESC driven motors with Adafruit PCA9685 16-Channel Servo Drivers and the I2C_Array_ESC library
+A sketch repository for Controlling an Array of 25 ESC driven motors with Adafruit PCA9685 16-Channel Servo Drivers and the I2C_ESC library
 
 ## Summary
-The sketch Based on [FireCastLabs/I2C_Array_ESC](https://github.com/FireCastLabs/I2C_Array_ESC) serial control example and extended to work with an array of 25 ESCs using four Adafruit PCA9685 16-Channel Servo Drivers on the I2C bus
+The sketch Based on [FireCastLabs/I2C_ESC](https://github.com/FireCastLabs/I2C_ESC) serial control example and extended to work with an array of 25 ESCs using four Adafruit PCA9685 16-Channel Servo Drivers on the I2C bus
 
 ## Supported platforms
 
@@ -26,9 +26,8 @@ serial input commands
   - enter single potentiometer control
   - entering 20 while in potentiometer control will exit potentiometer control
 - 1000 Zero throttle value and stops all motors
-- 1050 aproximate minimum speed
+- 1057 aproximate minimum speed
 - 2000 maximum speed
 
   ## Version History
   - no releases have been made yet
-  - 2019/11/28 Pre-Prerelease major change; convert from broken I2C_ESC library to the working I2C_Array_ESC library. No version tags or releases have been made prior or with this change. This is only an informative note regarding a necessary change to this sketch.

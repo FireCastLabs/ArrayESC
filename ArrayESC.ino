@@ -1,17 +1,17 @@
-/*************************************************** 
-  This is Array of ESCs controlled with Adafruit 16-channel PWM & Servo driver
-  Servo test - this will drive 8 servos, one after the other on the
-  first 8 pins of the PCA9685
-
-  PWM extender replacements in the adafruit shop!
-  ------> http://www.adafruit.com/products/815
-  
-  These drivers use I2C to communicate, 2 pins are required to  
-  interface, and 2 pins for power and ground for a total of 4 pins.
-  5 wires are used to chain the PWM extenders together
-
-*****************************************************/
-#include <I2C_Array_ESC.h>
+/*
+ * This is Array of ESCs controlled with Adafruit 16-channel PWM & Servo driver
+ * Servo test - this will drive 8 servos, one after the other on the
+ * first 8 pins of the PCA9685
+ *
+ * PWM extender replacements in the adafruit shop!
+ * ------> http://www.adafruit.com/products/815
+ *
+ * These drivers use I2C to communicate, 2 pins are required to  
+ * interface, and 2 pins for power and ground for a total of 4 pins.
+ * 5 wires are used to chain the PWM extenders together
+ *
+**/
+#include <I2C_ESC.h>
 
 #define LED_PIN (13)       // Pin for the LED 
 #define SERVO_FREQ (50)    // Analog servos run at ~50 Hz updates
@@ -22,21 +22,22 @@
 #define SWITCH0_PIN (2)    // Analog pin used to connect the switch
 #define SWITCH1_PIN (3)    // Analog pin used to connect the switch
 
-int potVal;                // Variable to read the value from the analog pin
 int oESC;                  // Variable for the speed sent to the ESC
+int motorY_Pin = 0;        // Variable for the pin motor Y is on for the Forth chip set
+int potVal;                // Variable to read the value from the analog pin
 int switch0State = 0;      // variable for reading the switch status
 int switch1State = 0;      // variable for reading the switch status
 
 /*
  * Instantiate the PWM extenders
- * ESC_Name (I2C_address, Minimum Value, Maximum Value, Default Speed, Arm Value)
+ * ESC_Name (I2C_address, Minimum Value, Maximum Value, Arm Value)
  * 8 ESC/motors per I2C PWM/Servo extender, 16 signals per extender 2 lines per ESC with 1 for motor and 1 for reverse pin
  * Total 4 I2C PWM/Servo extenders for the 25 motors leaving 13 available signals on the last I2C PWM driver
  */
-I2C_Array_ESC motorsAH (0x40, SPEED_MIN, SPEED_MAX, ARM_VALUE); //First chip set of 8 motors
-I2C_Array_ESC motorsIP (0x41, SPEED_MIN, SPEED_MAX, ARM_VALUE); //Second chip set of 8 motors
-I2C_Array_ESC motorsQX (0x42,SPEED_MIN, SPEED_MAX, ARM_VALUE); //Third chip set of 8 motors
-I2C_Array_ESC motorsY (0x43, SPEED_MIN, SPEED_MAX, ARM_VALUE); //Forth chip set of 1 motor
+I2C_ESC motorsAH (0x40, SPEED_MIN, SPEED_MAX, ARM_VALUE); //First chip set of 8 motors
+I2C_ESC motorsIP (0x41, SPEED_MIN, SPEED_MAX, ARM_VALUE); //Second chip set of 8 motors
+I2C_ESC motorsQX (0x42,SPEED_MIN, SPEED_MAX, ARM_VALUE); //Third chip set of 8 motors
+I2C_ESC motorsY (0x43, SPEED_MIN, SPEED_MAX, ARM_VALUE); //Forth chip set of 1 motor
 
 void setup()
 {
@@ -48,7 +49,9 @@ void setup()
   pinMode(SWITCH1_PIN, INPUT);
 
   /*
-   * begin() calls the wire.begin() and is only done once per chipset
+   * Set up the I2C based PWM/Servo extenders
+   * begin() calls the wire.begin() over the I2C buss
+   * This is only done once per Adafruit PCA9685 PWM/Servo driver
    */
   motorsAH.begin(); // First Chip set
   motorsIP.begin(); // Second Chip set
@@ -89,7 +92,7 @@ void setup()
   motorsAH.armArray();
   motorsIP.armArray();
   motorsQX.armArray();
-  motorsY.arm(0);
+  motorsY.arm(motorY_Pin);
 
   digitalWrite(13, HIGH); // LED High Once ESCs are Armed
   delay(5000);  // Wait for a while for ESCs to be ready for all further commands
@@ -101,13 +104,12 @@ void setup()
   motorsAH.speedArray(SPEED_MIN);
   motorsIP.speedArray(SPEED_MIN);
   motorsQX.speedArray(SPEED_MIN);
-  motorsY.speed(0, SPEED_MIN);
+  motorsY.speed(motorY_Pin, SPEED_MIN);
 }
 
 void loop()
 {
-
-  // Read the state of the SWITCH_PIN value:
+  // Read the state of all the switches:
   switch0State = digitalRead(SWITCH0_PIN);
   switch1State = digitalRead(SWITCH1_PIN);
 
@@ -118,12 +120,19 @@ void loop()
     motorsAH.speedArray(SPEED_MIN);
     motorsIP.speedArray(SPEED_MIN);
     motorsQX.speedArray(SPEED_MIN);
-    motorsY.speed(0, SPEED_MIN);
-    delay(5000);  // Wait for a while for ESCs to be ready for all further commands
+    motorsY.speed(motorY_Pin, SPEED_MIN);
+    // Wait until Switch 0 is no longer in a high state
+    while (switch0State == HIGH)
+    {
+      // Check the Switch state agian
+      switch0State = digitalRead(SWITCH0_PIN);
+      // Wait a bit before checking again or exiting the while() loop
+      delay(10); 
+    }
   }
 
-  // Check if only the pot switch is flipped. If it is, the switch1State is HIGH, and the stop switch is not HIGH:
-  if (switch1State == HIGH && switch0State != HIGH)
+  // Check if the pot control switch is flipped. If it is, the switch1State is HIGH:
+  if (switch1State == HIGH)
   {
     potVal = analogRead(POT_PIN);         // reads the value of the potentiometer (value between 0 and 1023)
     potVal = map(potVal, 1023, 951, SPEED_MIN, SPEED_MAX);  // scale the log pot to use it with the ESC (value between Minimum and Maximum)
@@ -132,7 +141,7 @@ void loop()
     motorsAH.speedArray(potVal);
     motorsIP.speedArray(potVal);
     motorsQX.speedArray(potVal);
-    motorsY.speed(0, potVal);
+    motorsY.speed(motorY_Pin, potVal);
     Serial.print(potVal);
     Serial.println(" speed for all ESCs over pot");
   }
@@ -146,19 +155,19 @@ void loop()
       motorsAH.reverseArray();
       motorsIP.reverseArray();
       motorsQX.reverseArray();
-      motorsY.reverse(0);
+      motorsY.reverse(motorY_Pin);
     }
     else if (oESC == 15)
     {
       while (1)
       {
         potVal = analogRead(POT_PIN);         // reads the value of the potentiometer (value between 0 and 1023)
-        potVal = map(potVal, 0, 1023, SPEED_MIN, SPEED_MAX);  // scale it to use it with the ESC (value between Minimum and Maximum)
+        potVal = map(potVal, 1023, 951, SPEED_MIN, SPEED_MAX);  // scale it to use it with the ESC (value between Minimum and Maximum)
         // sets the Array ESC speed according to the scaled value from the potentiometer
         motorsAH.speedArray(potVal);
         motorsIP.speedArray(potVal);
         motorsQX.speedArray(potVal);
-        motorsY.speed(0, potVal);
+        motorsY.speed(motorY_Pin, potVal);
         Serial.print(potVal);
         Serial.println(" speed for all ESCs over pot");
         if (Serial.available() > 0)                             // read the value from the serial
@@ -177,7 +186,7 @@ void loop()
       motorsAH.speedArray(oESC);
       motorsIP.speedArray(oESC);
       motorsQX.speedArray(oESC);
-      motorsY.speed(0, oESC);
+      motorsY.speed(motorY_Pin, oESC);
       Serial.print(oESC);
       Serial.println(" speed for all ESCs");
     }
