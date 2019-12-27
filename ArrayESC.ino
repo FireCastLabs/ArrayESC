@@ -52,6 +52,7 @@ void setup()
    * Set up the I2C based PWM/Servo extenders
    * begin() calls the wire.begin() over the I2C buss
    * This is only done once per Adafruit PCA9685 PWM/Servo driver
+   * Analog servos run at ~50 Hz updates, begin prescale at ### to get approximatly 50Hz
    */
   motorsAH.begin(); // First Chip set
   motorsIP.begin(); // Second Chip set
