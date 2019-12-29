@@ -1,75 +1,63 @@
-/*************************************************** 
-  This is Array of ESCs controlled with Adafruit 16-channel PWM & Servo driver
-  Servo test - this will drive 8 servos, one after the other on the
-  first 8 pins of the PCA9685
-
-  PWM extender replacements in the adafruit shop!
-  ------> http://www.adafruit.com/products/815
-  
-  These drivers use I2C to communicate, 2 pins are required to  
-  interface, and 2 pins for power and ground for a total of 4 pins.
-  5 wires are used to chain the PWM extenders together
-
-*****************************************************/
+/*
+ * This is Array of ESCs controlled with Adafruit 16-channel PWM & Servo driver
+ * Servo test - this will drive 8 servos, one after the other on the
+ * first 8 pins of the PCA9685
+ *
+ * PWM extender replacements in the adafruit shop!
+ * ------> http://www.adafruit.com/products/815
+ *
+ * These drivers use I2C to communicate, 2 pins are required to  
+ * interface, and 2 pins for power and ground for a total of 4 pins.
+ * 5 wires are used to chain the PWM extenders together
+ *
+**/
 #include <I2C_ESC.h>
 
-#define LED_PIN (13)            // Pin for the LED 
-#define SERVO_FREQ (50)         // Analog servos run at ~50 Hz updates
-#define SPEED_MIN (1000)        // Set the Zero Throttle Speed in microseconds
-#define SPEED_MAX (2000)        // Set the Maximum Speed in microseconds
-#define ARM_VALUE (500)         // Set the Arm value in microseconds
-#define POT_PIN (A0)            // Analog pin used to connect the potentiometer
+#define LED_PIN (13)       // Pin for the LED 
+#define SERVO_FREQ (50)    // Analog servos run at ~50 Hz updates
+#define SPEED_MIN (1000)   // Set the Zero throttle Speed in microseconds
+#define SPEED_MAX (2000)   // Set the Maximum throttle Speed in microseconds
+#define ARM_VALUE (500)    // Set the Arm value in microseconds
+#define POT_PIN (A0)       // Analog pin used to connect the potentiometer
+#define SWITCH0_PIN (2)    // Analog pin used to connect the switch
+#define SWITCH1_PIN (3)    // Analog pin used to connect the switch
 
-int potVal;                     // Variable to read the value from the analog pin
-int oESC;                       // Variable for the speed sent to the ESC
+int oESC;                  // Variable for the speed sent to the ESC
+int motorY_Pin = 0;        // Variable for the pin motor Y is on for the Forth chip set
+int potVal;                // Variable to read the value from the analog pin
+int switch0State = 0;      // variable for reading the switch status
+int switch1State = 0;      // variable for reading the switch status
 
 /*
  * Instantiate the PWM extenders
- * ESC_Name (I2C_address, ESC PIN, reverse pin, Zero throttle Value, Maximum Value, Arm Value)
+ * ESC_Name (I2C_address, Minimum Value, Maximum Value, Arm Value)
  * 8 ESC/motors per I2C PWM/Servo extender, 16 signals per extender 2 lines per ESC with 1 for motor and 1 for reverse pin
- * Total 4 I2C PWM/Servo extenders for the 25 motors leaving 13 available signals
+ * Total 4 I2C PWM/Servo extenders for the 25 motors leaving 13 available signals on the last I2C PWM driver
  */
-I2C_ESC motorA (0x40, 0, 1, SPEED_MIN, SPEED_MAX, ARM_VALUE); //First chip set of 8 motors
-I2C_ESC motorB (0x40, 2, 3, SPEED_MIN, SPEED_MAX, ARM_VALUE);
-I2C_ESC motorC (0x40, 4, 5, SPEED_MIN, SPEED_MAX, ARM_VALUE);
-I2C_ESC motorD (0x40, 6, 7, SPEED_MIN, SPEED_MAX, ARM_VALUE);
-I2C_ESC motorE (0x40, 8, 9, SPEED_MIN, SPEED_MAX, ARM_VALUE);
-I2C_ESC motorF (0x40, 10, 11, SPEED_MIN, SPEED_MAX, ARM_VALUE);
-I2C_ESC motorG (0x40, 12, 13, SPEED_MIN, SPEED_MAX, ARM_VALUE);
-I2C_ESC motorH (0x40, 14, 15, SPEED_MIN, SPEED_MAX, ARM_VALUE);
-I2C_ESC motorI (0x41, 0, 1, SPEED_MIN, SPEED_MAX, ARM_VALUE); //Second chip set of 8 motors
-I2C_ESC motorJ (0x41, 2, 3, SPEED_MIN, SPEED_MAX, ARM_VALUE);
-I2C_ESC motorK (0x41, 4, 5, SPEED_MIN, SPEED_MAX, ARM_VALUE);
-I2C_ESC motorL (0x41, 6, 7, SPEED_MIN, SPEED_MAX, ARM_VALUE);
-I2C_ESC motorM (0x41, 8, 9, SPEED_MIN, SPEED_MAX, ARM_VALUE);
-I2C_ESC motorN (0x41, 10, 11, SPEED_MIN, SPEED_MAX, ARM_VALUE);
-I2C_ESC motorO (0x41, 12, 13, SPEED_MIN, SPEED_MAX, ARM_VALUE);
-I2C_ESC motorP (0x41, 14, 15, SPEED_MIN, SPEED_MAX, ARM_VALUE);
-I2C_ESC motorQ (0x42, 0, 1, SPEED_MIN, SPEED_MAX, ARM_VALUE); //Third chip set of 8 motors
-I2C_ESC motorR (0x42, 2, 3, SPEED_MIN, SPEED_MAX, ARM_VALUE);
-I2C_ESC motorS (0x42, 4, 5, SPEED_MIN, SPEED_MAX, ARM_VALUE);
-I2C_ESC motorT (0x42, 6, 7, SPEED_MIN, SPEED_MAX, ARM_VALUE);
-I2C_ESC motorU (0x42, 8, 9, SPEED_MIN, SPEED_MAX, ARM_VALUE);
-I2C_ESC motorV (0x42, 10, 11, SPEED_MIN, SPEED_MAX, ARM_VALUE);
-I2C_ESC motorW (0x42, 12, 13, SPEED_MIN, SPEED_MAX, ARM_VALUE);
-I2C_ESC motorX (0x42, 14, 15, SPEED_MIN, SPEED_MAX, ARM_VALUE);
-I2C_ESC motorY (0x43, 0, 1, SPEED_MIN, SPEED_MAX, ARM_VALUE); //Forth chip set of 8 motors
+I2C_ESC motorsAH (0x40, SPEED_MIN, SPEED_MAX, ARM_VALUE); //First chip set of 8 motors
+I2C_ESC motorsIP (0x41, SPEED_MIN, SPEED_MAX, ARM_VALUE); //Second chip set of 8 motors
+I2C_ESC motorsQX (0x42,SPEED_MIN, SPEED_MAX, ARM_VALUE); //Third chip set of 8 motors
+I2C_ESC motorsY (0x43, SPEED_MIN, SPEED_MAX, ARM_VALUE); //Forth chip set of 1 motor
 
 void setup()
 {
   Serial.begin(9600);
   Serial.println("ESC I2C control!");
 
+  // Initialize the switch pins as an input:
+  pinMode(SWITCH0_PIN, INPUT);
+  pinMode(SWITCH1_PIN, INPUT);
+
   /*
-   * Multiple setting of the I2C bus on the I2C PCA9685 PWM/Servo extender chip is likely to cause
-   * unusual behavior
-   * begin() calls the wire.begin() and should only be done once per chipset
+   * Set up the I2C based PWM/Servo extenders
+   * begin() calls the wire.begin() over the I2C buss
+   * This is only done once per Adafruit PCA9685 PWM/Servo driver
    * Analog servos run at ~50 Hz updates, begin prescale at ### to get approximatly 50Hz
    */
-  motorA.begin(); // First Chip set
-  motorI.begin(); // Second Chip set
-  motorQ.begin(); // Third Chip set
-  motorY.begin(); // Fourth chip set
+  motorsAH.begin(); // First Chip set
+  motorsIP.begin(); // Second Chip set
+  motorsQX.begin(); // Third Chip set
+  motorsY.begin();  // Fourth chip set
 
   /*
    * In theory the internal oscillator (clock) is 25MHz but it really isn't that precise. 
@@ -81,195 +69,106 @@ void setup()
    * 2) Adjust setOscillatorFrequency() until the PWM update frequency is the expected value (50Hz for most ESCs)
    * Setting the value here is specific to each individual I2C PCA9685 chip and affects the calculations for the PWM update frequency.
    * Failure to correctly set this value will cause unusual behavior in the ESCs
-   * We need to do this for each chipset and library instance
+   * We only need to do this once per chipset
    */
-  motorA.setOscillatorFrequency(24675000); // First Chip set
-  motorB.setOscillatorFrequency(24675000);
-  motorC.setOscillatorFrequency(24675000);
-  motorD.setOscillatorFrequency(24675000);
-  motorE.setOscillatorFrequency(24675000);
-  motorF.setOscillatorFrequency(24675000);
-  motorG.setOscillatorFrequency(24675000);
-  motorH.setOscillatorFrequency(24675000);
-  motorI.setOscillatorFrequency(25000000); // Second Chip set
-  motorJ.setOscillatorFrequency(25000000);
-  motorK.setOscillatorFrequency(25000000);
-  motorL.setOscillatorFrequency(25000000);
-  motorM.setOscillatorFrequency(25000000);
-  motorN.setOscillatorFrequency(25000000);
-  motorO.setOscillatorFrequency(25000000);
-  motorP.setOscillatorFrequency(25000000);
-  motorQ.setOscillatorFrequency(24060000); // Third Chip set
-  motorR.setOscillatorFrequency(24060000);
-  motorS.setOscillatorFrequency(24060000);
-  motorT.setOscillatorFrequency(24060000);
-  motorU.setOscillatorFrequency(24060000);
-  motorV.setOscillatorFrequency(24060000);
-  motorW.setOscillatorFrequency(24060000);
-  motorX.setOscillatorFrequency(24060000);
-  motorY.setOscillatorFrequency(24090000); // Fourth chip set
+  motorsAH.setOscillatorFrequency(24600000); // First Chip set
+  motorsIP.setOscillatorFrequency(25000000); // Second Chip set
+  motorsQX.setOscillatorFrequency(24060000); // Third Chip set
+  motorsY.setOscillatorFrequency(24090000);  // Fourth chip set
 
  /*
   * Set the analog servo PWM frequency
-  * alternativly you could set this using the prescale 50Hz is a prescale of about ### (depending on the internal oscillator frequency)
-  * We need to do this for each library instance as it is used in internal library calculations
+  * alternativly you could set this using the prescale, 50Hz is a prescale of about ### (depending on the internal oscillator frequency)
+  * This is only done once per Adafruit PCA9685 PWM/Servo driver
   */
-  motorA.setPWMFreq(SERVO_FREQ); // First Chip set
-  motorB.setPWMFreq(SERVO_FREQ);
-  motorC.setPWMFreq(SERVO_FREQ);
-  motorD.setPWMFreq(SERVO_FREQ);
-  motorE.setPWMFreq(SERVO_FREQ);
-  motorF.setPWMFreq(SERVO_FREQ);
-  motorG.setPWMFreq(SERVO_FREQ);
-  motorH.setPWMFreq(SERVO_FREQ);
-  motorI.setPWMFreq(SERVO_FREQ); // Second Chip set
-  motorJ.setPWMFreq(SERVO_FREQ);
-  motorK.setPWMFreq(SERVO_FREQ);
-  motorL.setPWMFreq(SERVO_FREQ);
-  motorM.setPWMFreq(SERVO_FREQ);
-  motorN.setPWMFreq(SERVO_FREQ);
-  motorO.setPWMFreq(SERVO_FREQ);
-  motorP.setPWMFreq(SERVO_FREQ);
-  motorQ.setPWMFreq(SERVO_FREQ); // Third Chip set
-  motorR.setPWMFreq(SERVO_FREQ);
-  motorS.setPWMFreq(SERVO_FREQ);
-  motorT.setPWMFreq(SERVO_FREQ);
-  motorU.setPWMFreq(SERVO_FREQ);
-  motorV.setPWMFreq(SERVO_FREQ);
-  motorW.setPWMFreq(SERVO_FREQ);
-  motorX.setPWMFreq(SERVO_FREQ);
-  motorY.setPWMFreq(SERVO_FREQ); // Fourth chip set
+  motorsAH.setPWMFreq(SERVO_FREQ);
+  motorsIP.setPWMFreq(SERVO_FREQ);
+  motorsQX.setPWMFreq(SERVO_FREQ);
+  motorsY.setPWMFreq(SERVO_FREQ);
 
   delay(10); // Set a small delay to allow the PCA9685 chips time to set their frequency
   pinMode(13, OUTPUT);  // LED Visual Output pin
 
   // Arm the ESCs for the motors
-  motorA.arm();
-  motorB.arm();
-  motorC.arm();
-  motorD.arm();
-  motorE.arm();
-  motorF.arm();
-  motorG.arm();
-  motorH.arm();
-  motorI.arm();
-  motorJ.arm();
-  motorK.arm();
-  motorL.arm();
-  motorM.arm();
-  motorN.arm();
-  motorO.arm();
-  motorP.arm();
-  motorQ.arm();
-  motorR.arm();
-  motorS.arm();
-  motorT.arm();
-  motorU.arm();
-  motorV.arm();
-  motorW.arm();
-  motorX.arm();
-  motorY.arm();
+  motorsAH.armArray();
+  motorsIP.armArray();
+  motorsQX.armArray();
+  motorsY.arm(motorY_Pin);
 
   digitalWrite(13, HIGH); // LED High Once ESCs are Armed
-  delay(5000); // Wait for a while for all ESCs to be ready for commands
+  delay(5000);  // Wait for a while for ESCs to be ready for all further commands
 
   /*
-   * Set ESCs to minimum speed now that the ESCs should be Armed
+   * Set ESCs to the Zero throttle setting now that the ESCs should be Armed
    * This is necessary or the ESCs will not be able to work
    */
-  motorA.speed(SPEED_MIN);
-  motorB.speed(SPEED_MIN);
-  motorC.speed(SPEED_MIN);
-  motorD.speed(SPEED_MIN);
-  motorE.speed(SPEED_MIN);
-  motorF.speed(SPEED_MIN);
-  motorG.speed(SPEED_MIN);
-  motorH.speed(SPEED_MIN);
-  motorI.speed(SPEED_MIN);
-  motorJ.speed(SPEED_MIN);
-  motorK.speed(SPEED_MIN);
-  motorL.speed(SPEED_MIN);
-  motorM.speed(SPEED_MIN);
-  motorN.speed(SPEED_MIN);
-  motorO.speed(SPEED_MIN);
-  motorP.speed(SPEED_MIN);
-  motorQ.speed(SPEED_MIN);
-  motorR.speed(SPEED_MIN);
-  motorS.speed(SPEED_MIN);
-  motorT.speed(SPEED_MIN);
-  motorU.speed(SPEED_MIN);
-  motorV.speed(SPEED_MIN);
-  motorW.speed(SPEED_MIN);
-  motorX.speed(SPEED_MIN);
-  motorY.speed(SPEED_MIN);
+  motorsAH.speedArray(SPEED_MIN);
+  motorsIP.speedArray(SPEED_MIN);
+  motorsQX.speedArray(SPEED_MIN);
+  motorsY.speed(motorY_Pin, SPEED_MIN);
 }
 
 void loop()
 {
+  // Read the state of all the switches:
+  switch0State = digitalRead(SWITCH0_PIN);
+  switch1State = digitalRead(SWITCH1_PIN);
+
+  // Check if the stop switch is flipped. If it is, the switch0State is HIGH:
+  if (switch0State == HIGH)
+  {
+    // turn motors off by setting to zero throttle:
+    motorsAH.speedArray(SPEED_MIN);
+    motorsIP.speedArray(SPEED_MIN);
+    motorsQX.speedArray(SPEED_MIN);
+    motorsY.speed(motorY_Pin, SPEED_MIN);
+    // Wait until Switch 0 is no longer in a high state
+    while (switch0State == HIGH)
+    {
+      // Check the Switch state agian
+      switch0State = digitalRead(SWITCH0_PIN);
+      // Wait a bit before checking again or exiting the while() loop
+      delay(10); 
+    }
+  }
+
+  // Check if the pot control switch is flipped. If it is, the switch1State is HIGH:
+  if (switch1State == HIGH)
+  {
+    potVal = analogRead(POT_PIN);         // reads the value of the potentiometer (value between 0 and 1023)
+    potVal = map(potVal, 1023, 951, SPEED_MIN, SPEED_MAX);  // scale the log pot to use it with the ESC (value between Minimum and Maximum)
+    potVal = constrain (potVal, SPEED_MIN, SPEED_MAX);
+    // sets the ESC speed according to the scaled value
+    motorsAH.speedArray(potVal);
+    motorsIP.speedArray(potVal);
+    motorsQX.speedArray(potVal);
+    motorsY.speed(motorY_Pin, potVal);
+    Serial.print(potVal);
+    Serial.println(" speed for all ESCs over pot");
+  }
+
   if (Serial.available() > 0) // read the value from the serial
   {
     int oESC = Serial.parseInt();
     if (oESC == 5)
     {
       Serial.println("stopping and setting all ESCs to reverse mode");
-      motorA.reverse();
-      motorB.reverse();
-      motorC.reverse();
-      motorD.reverse();
-      motorE.reverse();
-      motorF.reverse();
-      motorG.reverse();
-      motorH.reverse();
-      motorI.reverse();
-      motorJ.reverse();
-      motorK.reverse();
-      motorL.reverse();
-      motorM.reverse();
-      motorN.reverse();
-      motorO.reverse();
-      motorP.reverse();
-      motorQ.reverse();
-      motorR.reverse();
-      motorS.reverse();
-      motorT.reverse();
-      motorU.reverse();
-      motorV.reverse();
-      motorW.reverse();
-      motorX.reverse();
-      motorY.reverse();
+      motorsAH.reverseArray();
+      motorsIP.reverseArray();
+      motorsQX.reverseArray();
+      motorsY.reverse(motorY_Pin);
     }
     else if (oESC == 15)
     {
       while (1)
       {
         potVal = analogRead(POT_PIN);         // reads the value of the potentiometer (value between 0 and 1023)
-        potVal = map(potVal, 0, 1023, SPEED_MIN, SPEED_MAX);  // scale it to use it with the ESC (value between Minimum and Maximum)
+        potVal = map(potVal, 1023, 951, SPEED_MIN, SPEED_MAX);  // scale it to use it with the ESC (value between Minimum and Maximum)
         // sets the Array ESC speed according to the scaled value from the potentiometer
-        motorA.speed(potVal);
-        motorB.speed(potVal);
-        motorC.speed(potVal);
-        motorD.speed(potVal);
-        motorE.speed(potVal);
-        motorF.speed(potVal);
-        motorG.speed(potVal);
-        motorH.speed(potVal);
-        motorI.speed(potVal);
-        motorJ.speed(potVal);
-        motorK.speed(potVal);
-        motorL.speed(potVal);
-        motorM.speed(potVal);
-        motorN.speed(potVal);
-        motorO.speed(potVal);
-        motorP.speed(potVal);
-        motorQ.speed(potVal);
-        motorR.speed(potVal);
-        motorS.speed(potVal);
-        motorT.speed(potVal);
-        motorU.speed(potVal);
-        motorV.speed(potVal);
-        motorW.speed(potVal);
-        motorX.speed(potVal);
-        motorY.speed(potVal);
+        motorsAH.speedArray(potVal);
+        motorsIP.speedArray(potVal);
+        motorsQX.speedArray(potVal);
+        motorsY.speed(motorY_Pin, potVal);
         Serial.print(potVal);
         Serial.println(" speed for all ESCs over pot");
         if (Serial.available() > 0)                             // read the value from the serial
@@ -285,31 +184,10 @@ void loop()
     }
     else
     {
-      motorA.speed(oESC);
-      motorB.speed(oESC);
-      motorC.speed(oESC);
-      motorD.speed(oESC);
-      motorE.speed(oESC);
-      motorF.speed(oESC);
-      motorG.speed(oESC);
-      motorH.speed(oESC);
-      motorI.speed(oESC);
-      motorJ.speed(oESC);
-      motorK.speed(oESC);
-      motorL.speed(oESC);
-      motorM.speed(oESC);
-      motorN.speed(oESC);
-      motorO.speed(oESC);
-      motorP.speed(oESC);
-      motorQ.speed(oESC);
-      motorR.speed(oESC);
-      motorS.speed(oESC);
-      motorT.speed(oESC);
-      motorU.speed(oESC);
-      motorV.speed(oESC);
-      motorW.speed(oESC);
-      motorX.speed(oESC);
-      motorY.speed(oESC);
+      motorsAH.speedArray(oESC);
+      motorsIP.speedArray(oESC);
+      motorsQX.speedArray(oESC);
+      motorsY.speed(motorY_Pin, oESC);
       Serial.print(oESC);
       Serial.println(" speed for all ESCs");
     }

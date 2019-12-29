@@ -1,8 +1,5 @@
 # Test build the arduino library with Travis CI and PlatformIO
 language: python
-# Force Python 2.7 until platformio is compatable with Python 3
-python:
-  - "2.7"
 
 # Cache PlatformIO packages using Travis CI container-based infrastructure
 sudo: false
@@ -24,7 +21,6 @@ matrix:
 install:
   - pip install -U platformio
   - platformio lib install https://github.com/adafruit/Adafruit-PWM-Servo-Driver-Library.git https://github.com/FireCastLabs/I2C_ESC.git
-
 
 # library example testing
 script:
