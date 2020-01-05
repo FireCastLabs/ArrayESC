@@ -153,7 +153,7 @@ void loop()
       while (1)
       {
         potVal = analogRead(POT_PIN);         // reads the value of the potentiometer (value between 0 and 1023)
-        potVal = map(potVal, 0, 1023, SPEED_MIN, SPEED_MAX);  // scale it to use it with the ESC (value between Minimum and Maximum)
+        potVal = map(potVal, 1023, 951, SPEED_MIN, SPEED_MAX);  // scale it to use it with the ESC (value between Minimum and Maximum)
         // sets the Array ESC speed according to the scaled value from the potentiometer
         motorsAH.speedArray(potVal);
         motorsIP.speedArray(potVal);
